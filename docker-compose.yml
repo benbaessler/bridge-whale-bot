@@ -1,0 +1,8 @@
+version: '3.4'
+
+services:
+  bridgewhalebot:
+    image: bridgewhalebot
+    build:
+      context: .
+      dockerfile: ./Dockerfile
