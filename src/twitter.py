@@ -9,8 +9,21 @@ auth.set_access_token(os.getenv('TWITTER_ACCESS_TOKEN'), os.getenv('TWITTER_ACCE
 
 api = tweepy.API(auth)
 
+class StreamListener(tweepy.StreamListener):
+
+  def on_data(self, data):
+    print('Something happened!')
+    print(data)
+
+  def on_status(self, status):
+    print(status.text)
+
 class Monitor:
 
   def start():
     user = api.get_user(os.getenv('TWITTER_USERNAME'))
-    print(user.followers_count)
+
+    print('Streaming activities from @{}...'.format(os.getenv('TWITTER_USERNAME')))
+    stream_listener = StreamListener()
+    stream = tweepy.Stream(auth = api.auth, listener = stream_listener)
+    stream.filter(follow=[user.id_str])
