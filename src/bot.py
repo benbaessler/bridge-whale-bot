@@ -4,16 +4,20 @@ from dotenv import load_dotenv
 
 load_dotenv()
 
+discord_channel_id = os.getenv('DISCORD_CHANNEL_ID')
+discord_bot_token = os.getenv('DISCORD_BOT_TOKEN')
+
 client = discord.Client()
-channel = client.get_channel(os.getenv('DISCORD_CHANNEL_ID'))
 
 @client.event
 async def on_ready():
   print('Logged in as {0.user}'.format(client))
 
-async def send_message(tweet):
-  if not client:
-    return 'Discord Bot is not running'
-  await client.send_message(channel, tweet['text'])
+@client.event
+async def on_message(message):
+  if message.author == client.user: return
 
-client.run(os.getenv('DISCORD_BOT_TOKEN'))
+  if str(message.channel.id) == discord_channel_id:
+    await message.channel.send('Hey {}'.format(message.author.name))
+
+client.run(discord_bot_token)
