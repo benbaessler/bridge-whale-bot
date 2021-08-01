@@ -1,6 +1,7 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from dotenv import load_dotenv
 import tweepy
+import time
 import os
 
 # Getting .env variables
