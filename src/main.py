@@ -15,8 +15,6 @@ twitter_access_token = os.getenv('TWITTER_ACCESS_TOKEN')
 twitter_access_secret = os.getenv('TWITTER_ACCESS_SECRET')
 discord_webhook_url = os.getenv('DISCORD_WEBHOOK_URL')
 
-webhook = DiscordWebhook(discord_webhook_url)
-
 class StreamListener(tweepy.StreamListener):
 
   def on_status(self, status):
@@ -35,6 +33,7 @@ def get_timestamp():
   return time_obj.strftime('%H:%M:%S')
 
 def send_webhook(tweet):
+  webhook = DiscordWebhook(discord_webhook_url)
   message_embed = DiscordEmbed(
     title = '{} (@{})'.format(user.name, user.screen_name),
     url = 'https://twitter.com/{}/status/{}'.format(twitter_username, tweet.id_str),
@@ -43,7 +42,6 @@ def send_webhook(tweet):
   )
   webhook.add_embed(message_embed)
   response = webhook.execute()
-
 
 # Authorising Twitter
 auth = tweepy.OAuthHandler(twitter_api_key, twitter_api_secret)
