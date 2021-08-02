@@ -43,8 +43,7 @@ def send_webhook(tweet):
   )
   webhook.add_embed(message_embed)
   response = webhook.execute()
-  time.sleep(5)
-  webhook.delete(response)
+
 
 # Authorising Twitter
 auth = tweepy.OAuthHandler(twitter_api_key, twitter_api_secret)
