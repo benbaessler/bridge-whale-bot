@@ -1,5 +1,6 @@
 from discord_webhook import DiscordWebhook, DiscordEmbed
 from dotenv import load_dotenv
+from datetime import datetime
 import tweepy
 import time
 import os
@@ -19,15 +20,19 @@ webhook = DiscordWebhook(discord_webhook_url)
 class StreamListener(tweepy.StreamListener):
 
   def on_status(self, status):
-    print('New Tweet from @{}'.format(twitter_username))
+    print('({}) New Tweet from @{}'.format(get_timestamp(), twitter_username))
 
     if '🦡' in status.text:
-      print('New transaction on Badger Bridge')
+      print('({}) New transaction on Badger Bridge'.format(get_timestamp()))
       send_webhook(status)
 
   def on_error(self, status_code):
-    print('StreamListener Error: {}'.format(status_code))
+    print('({}) StreamListener Error: {}'.format(get_timestamp(), status_code))
     return
+
+def get_timestamp():
+  time_obj = datetime.now()
+  return time_obj.strftime('%H:%M:%S')
 
 def send_webhook(tweet):
   message_embed = DiscordEmbed(
@@ -48,5 +53,11 @@ api = tweepy.API(auth)
 user = api.get_user(twitter_username)
 stream = tweepy.Stream(auth, StreamListener())
 
-print('Streaming activities from @{}...'.format(twitter_username))
-stream.filter(follow = [user.id_str], is_async = True)
+print('({}) Streaming activities from @{}...'.format(get_timestamp(), twitter_username))
+
+while True:
+  try:
+    stream.filter(follow = [user.id_str], is_async = True)
+  except:
+    continue
+
