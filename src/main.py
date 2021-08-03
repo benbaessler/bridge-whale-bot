@@ -18,10 +18,10 @@ discord_webhook_url = os.getenv('DISCORD_WEBHOOK_URL')
 class StreamListener(tweepy.StreamListener):
 
   def on_status(self, status):
-    print('({}) New Tweet from @{}'.format(get_timestamp(), twitter_username))
+    print('({}) New Tweet from @{}'.format(get_timestamp(), user.screen_name))
 
     if '🦡' in status.text:
-      print('({}) New transaction on Badger Bridge'.format(get_timestamp()))
+      print('({}) => Sending Tweet to Discord'.format(get_timestamp()))
       send_webhook(status)
 
   def on_error(self, status_code):
@@ -34,12 +34,20 @@ def get_timestamp():
 
 def send_webhook(tweet):
   webhook = DiscordWebhook(discord_webhook_url)
+
+  try:
+    etherscan_url = tweet.entities['urls'][0]['expanded_url']
+  except IndexError:
+    etherscan_url = ''
+
   message_embed = DiscordEmbed(
     title = '{} (@{})'.format(user.name, user.screen_name),
-    url = 'https://twitter.com/{}/status/{}'.format(twitter_username, tweet.id_str),
-    description = tweet.text,
+    url = 'https://twitter.com/{}/status/{}'.format(user.screen_name, tweet.id_str),
+    description = tweet.text.replace(tweet.entities['urls'][0]['url'], ''),
     color = 0xf2a52b
   )
+  message_embed.add_embed_field(name = 'Transaction', value = etherscan_url)
+
   webhook.add_embed(message_embed)
   response = webhook.execute()
 
@@ -52,11 +60,10 @@ api = tweepy.API(auth)
 user = api.get_user(twitter_username)
 stream = tweepy.Stream(auth, StreamListener())
 
-print('({}) Streaming activities from @{}...'.format(get_timestamp(), twitter_username))
+print('({}) Streaming activities from @{}...'.format(get_timestamp(), user.screen_name))
 
 while True:
   try:
     stream.filter(follow = [user.id_str], is_async = True)
   except:
     continue
-
